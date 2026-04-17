@@ -391,5 +391,34 @@ namespace WMS.Database_Dao
         }
     }
 
+    // 這是傳送給客戶端的配置包
+public class PageConfig {
+    private String pageTitle;
+    private List<ColumnDef> columns; // 用於 List Page
+    private List<FieldDef> fields;   // 用於 Card Page (新增/編輯)
+    private List<String> permissions; // 按鈕權限
 
+    // Getters and Setters...
+}
+
+public class ColumnDef {
+    private String header;    // 表頭文字
+    private String dataKey;   // 對應 Entity 的屬性名
+    private String type;      // string, number, date, status_tag
+}
+    
+public PageConfig generateMetadata(Class<?> entityClass) {
+    PageConfig config = new PageConfig();
+    List<ColumnDef> columns = new ArrayList<>();
+    
+    // 遍歷實體類別的 Field，自動生成表頭定義
+    for (Field field : entityClass.getDeclaredFields()) {
+        if (field.isAnnotationPresent(UIColumn.class)) { // 自定義一個註解來過濾
+            UIColumn anno = field.getAnnotation(UIColumn.class);
+            columns.add(new ColumnDef(anno.name(), field.getName(), "string"));
+        }
+    }
+    config.setColumns(columns);
+    return config;
+}
 }
